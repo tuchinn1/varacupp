@@ -151,9 +151,68 @@ table.sc th:last-child, table.sc td:last-child { border-right:none; }
 .hint { font-family:'DM Mono',monospace; font-size:10px; color:var(--muted); margin-top:10px; }
 
 @media(max-width:700px){
-  header,.tabs-bar,#panel-lb,#panel-sc{padding-left:20px;padding-right:20px;}
-  .rinput{width:58px;font-size:14px;}
-  .sc-totals{gap:8px;}
+  header { padding:20px 16px 18px; }
+  .subtitle { font-size:9px; letter-spacing:1.5px; }
+  .live-pill { font-size:9px; padding:4px 10px; margin-top:12px; }
+  .tabs-bar { padding:0 16px; }
+  .tab { font-size:10px; padding:12px 14px; letter-spacing:1px; }
+  #panel-lb { padding:16px; }
+  #panel-sc { padding:16px; }
+
+  /* LEADERBOARD: ocultar tabla, mostrar cards */
+  .table-wrap { display:none; }
+  .lb-mobile { display:flex !important; flex-direction:column; gap:10px; }
+
+  .lb-mobile-card {
+    background:var(--s1); border:1px solid var(--border); border-radius:12px;
+    overflow:hidden;
+  }
+  .lb-mobile-card.leader-card { border-color:rgba(240,180,41,.4); }
+
+  .lb-mc-top {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 16px; border-bottom:1px solid var(--border);
+  }
+  .lb-mc-left { display:flex; align-items:center; gap:10px; }
+  .lb-mc-rank { font-family:'Bebas Neue',sans-serif; font-size:26px; width:22px; text-align:center; color:var(--muted); }
+  .lb-mc-rank.r1{color:#f0b429} .lb-mc-rank.r2{color:#b0bec5} .lb-mc-rank.r3{color:#bf8e5a}
+  .lb-mc-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .lb-mc-name { font-size:15px; font-weight:600; }
+  .lb-mc-right { text-align:right; }
+  .lb-mc-total { font-family:'Bebas Neue',sans-serif; font-size:28px; line-height:1; }
+  .lb-mc-vspar { font-family:'DM Mono',monospace; font-size:12px; }
+  .lb-mc-vspar.under{color:var(--under)} .lb-mc-vspar.over{color:var(--over)} .lb-mc-vspar.even{color:var(--muted)}
+
+  .lb-mc-rounds {
+    display:grid; grid-template-columns:repeat(4,1fr);
+  }
+  .lb-mc-round {
+    padding:10px 8px; text-align:center;
+    border-right:1px solid var(--border);
+  }
+  .lb-mc-round:last-child { border-right:none; }
+  .lb-mc-rlbl { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); display:block; margin-bottom:4px; }
+  .lb-mc-rval {
+    display:block; width:100%; height:36px; line-height:36px;
+    background:var(--s2); border:1px solid var(--border); border-radius:6px;
+    font-family:'DM Mono',monospace; font-size:15px; font-weight:500;
+    text-align:center; color:var(--text);
+  }
+  .lb-mc-rval.locked { border-color:transparent; background:transparent; }
+  .lb-mc-rval.under{color:var(--under)} .lb-mc-rval.over{color:var(--over)} .lb-mc-rval.even{color:var(--muted)}
+  .lb-mc-rinput {
+    display:block; width:100%; height:36px;
+    background:var(--s2); border:1px solid var(--border); border-radius:6px;
+    font-family:'DM Mono',monospace; font-size:15px; font-weight:500;
+    text-align:center; color:var(--text); outline:none;
+  }
+  .lb-mc-rinput:focus { border-color:var(--gold); background:rgba(240,180,41,.1); }
+
+  /* scorecards header compact */
+  .sc-player-header { flex-direction:column; align-items:flex-start; gap:10px; padding:12px 14px; }
+  .sc-totals { width:100%; justify-content:space-around; }
+  .sc-tot-val { font-size:18px !important; }
+  .rsel-btn { font-size:9px; padding:6px 12px; }
 }
 </style>
 </head>
@@ -183,6 +242,8 @@ table.sc th:last-child, table.sc td:last-child { border-right:none; }
       <tbody id="tbody"></tbody>
     </table>
   </div>
+  <!-- Mobile leaderboard (cards) -->
+  <div class="lb-mobile" id="lb-mobile" style="display:none"></div>
   <div class="legend" style="padding:0;margin-top:16px;">
     <div class="li"><div class="ld" style="background:var(--under)"></div>Bajo par</div>
     <div class="li"><div class="ld" style="background:var(--muted)"></div>Par (E)</div>
@@ -503,6 +564,95 @@ function switchTab(id) {
 renderLB();
 renderRoundSelector();
 renderScorecards();
+
+// ═══════════════════════════════════════════════════════════
+// MOBILE LEADERBOARD
+// ═══════════════════════════════════════════════════════════
+function renderMobileLB() {
+  const container = document.getElementById('lb-mobile');
+  if (!container) return;
+  const focusPid = document.activeElement?.dataset?.mpid;
+  container.innerHTML = '';
+  const list = sorted();
+  const rankCls = ['r1','r2','r3',''];
+  const parTotals = [71,69,72,71];
+
+  list.forEach((p, rank) => {
+    const pid = p.id;
+    const vs = totalVs(pid);
+    const rp = roundsPlayed(pid);
+    const strokes = ROUND_VS[pid].reduce((s,v,i) => v!==null ? s+parTotals[i]+v : s, 0);
+
+    const card = document.createElement('div');
+    card.className = 'lb-mobile-card' + (rank===0?' leader-card':'');
+
+    // Top row
+    const top = document.createElement('div');
+    top.className = 'lb-mc-top';
+    top.innerHTML = `
+      <div class="lb-mc-left">
+        <span class="lb-mc-rank ${rankCls[rank]}">${rank+1}</span>
+        <span class="lb-mc-dot" style="background:${p.color}"></span>
+        <span class="lb-mc-name">${p.name}</span>
+      </div>
+      <div class="lb-mc-right">
+        <div class="lb-mc-total" style="color:${p.color}">${strokes || '—'}</div>
+        <div class="lb-mc-vspar ${cls(vs)}">${fmt(vs) || 'E'}</div>
+      </div>`;
+    card.appendChild(top);
+
+    // Rounds row
+    const rounds = document.createElement('div');
+    rounds.className = 'lb-mc-rounds';
+
+    ['R1','R2','R3','R4'].forEach((rlabel, ri) => {
+      const v = ROUND_VS[pid][ri];
+      const div = document.createElement('div');
+      div.className = 'lb-mc-round';
+
+      const lbl = document.createElement('span');
+      lbl.className = 'lb-mc-rlbl';
+      lbl.textContent = rlabel;
+      div.appendChild(lbl);
+
+      if (ri < 3) {
+        // locked
+        const span = document.createElement('span');
+        span.className = `lb-mc-rval locked ${cls(v)}`;
+        span.textContent = fmt(v) || '—';
+        div.appendChild(span);
+      } else {
+        // editable R4
+        const inp = document.createElement('input');
+        inp.type = 'text';
+        inp.className = 'lb-mc-rinput' + (v!==null?' '+cls(v):'');
+        inp.value = v!==null ? fmt(v) : '';
+        inp.placeholder = '—';
+        inp.dataset.mpid = pid;
+        inp.addEventListener('blur', e => {
+          const parsed = parse(e.target.value);
+          ROUND_VS[pid][3] = parsed;
+          renderLB();
+          renderMobileLB();
+        });
+        inp.addEventListener('keydown', e => { if(e.key==='Enter') e.target.blur(); });
+        div.appendChild(inp);
+      }
+      rounds.appendChild(div);
+    });
+
+    card.appendChild(rounds);
+    container.appendChild(card);
+  });
+
+  // Restore focus
+  if (focusPid) {
+    const el = document.querySelector(`input[data-mpid="${focusPid}"]`);
+    if (el) el.focus();
+  }
+}
+
+renderMobileLB();
 </script>
 </body>
 </html>
