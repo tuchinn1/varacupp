@@ -20,7 +20,7 @@
 }
 body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; }
 
-/* ── HEADER ── */
+/* HEADER */
 header {
   padding:32px 48px 24px; border-bottom:1px solid var(--border);
   background:linear-gradient(160deg,#0e1520 0%,#080c14 60%,#0a1225 100%);
@@ -41,7 +41,7 @@ header::after {
 .pulse { width:6px; height:6px; border-radius:50%; background:#22c55e; animation:pulse 1.8s infinite; }
 @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.3;transform:scale(.7)} }
 
-/* ── TABS ── */
+/* TABS */
 .tabs-bar {
   display:flex; gap:2px; padding:0 48px;
   background:var(--s1); border-bottom:1px solid var(--border);
@@ -53,11 +53,10 @@ header::after {
 }
 .tab:hover { color:var(--text); }
 .tab.active { color:var(--gold); border-bottom-color:var(--gold); }
-
 .tab-panel { display:none; }
 .tab-panel.active { display:block; }
 
-/* ── LEADERBOARD ── */
+/* LEADERBOARD */
 #panel-lb { padding:36px 48px; }
 .table-wrap { background:var(--s1); border:1px solid var(--border); border-radius:14px; overflow:hidden; }
 table.lb { width:100%; border-collapse:collapse; }
@@ -102,7 +101,7 @@ table.lb td:first-child { text-align:left; }
 .tvspar.under{color:var(--under)} .tvspar.over{color:var(--over)} .tvspar.even{color:var(--muted)}
 .tthru { font-family:'DM Mono',monospace; font-size:9px; color:var(--muted); letter-spacing:1px; }
 
-/* ── SCORECARDS PANEL ── */
+/* SCORECARDS */
 #panel-sc { padding:36px 48px; }
 .round-selector { display:flex; gap:8px; margin-bottom:28px; flex-wrap:wrap; }
 .rsel-btn {
@@ -113,14 +112,8 @@ table.lb td:first-child { text-align:left; }
 .rsel-btn:hover { border-color:var(--muted); color:var(--text); }
 .rsel-btn.active { background:var(--gold); color:#000; border-color:var(--gold); font-weight:600; }
 
-.sc-player-card {
-  background:var(--s1); border:1px solid var(--border); border-radius:12px;
-  margin-bottom:16px; overflow:hidden;
-}
-.sc-player-header {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:13px 20px; border-bottom:1px solid var(--border);
-}
+.sc-player-card { background:var(--s1); border:1px solid var(--border); border-radius:12px; margin-bottom:16px; overflow:hidden; }
+.sc-player-header { display:flex; align-items:center; justify-content:space-between; padding:13px 20px; border-bottom:1px solid var(--border); }
 .sc-player-name { display:flex; align-items:center; gap:10px; }
 .sc-pdot { width:9px; height:9px; border-radius:50%; }
 .sc-pname { font-size:14px; font-weight:600; }
@@ -148,12 +141,10 @@ table.sc th:last-child, table.sc td:last-child { border-right:none; }
 .sc-par-s  { background:var(--par-bg);    color:var(--par-fg); }
 .sc-bogey  { background:var(--bogey-bg);  color:var(--bogey-fg); }
 .sc-double { background:var(--double-bg); color:var(--double-fg); }
-.sc-empty  { background:transparent; color:var(--muted); }
 
 .sc-sub { font-family:'DM Mono',monospace; font-size:11px; color:var(--text); padding:5px 8px; background:rgba(240,180,41,.05); border-left:1px solid rgba(240,180,41,.2); height:34px; vertical-align:middle; }
 .sc-sub small { display:block; font-size:9px; color:var(--muted); line-height:1; margin-top:1px; }
 
-/* legend */
 .legend { display:flex; gap:16px; align-items:center; flex-wrap:wrap; margin-top:20px; }
 .li { display:flex; align-items:center; gap:6px; font-family:'DM Mono',monospace; font-size:10px; color:var(--muted); }
 .ld { width:10px; height:10px; border-radius:2px; }
@@ -162,6 +153,7 @@ table.sc th:last-child, table.sc td:last-child { border-right:none; }
 @media(max-width:700px){
   header,.tabs-bar,#panel-lb,#panel-sc{padding-left:20px;padding-right:20px;}
   .rinput{width:58px;font-size:14px;}
+  .sc-totals{gap:8px;}
 }
 </style>
 </head>
@@ -169,8 +161,8 @@ table.sc th:last-child, table.sc td:last-child { border-right:none; }
 
 <header>
   <div class="title">VARA CUP</div>
-  <div class="subtitle">Royal Portrush Golf Club · 72 Holes · 4 Rounds</div>
-  <div class="live-pill"><span class="pulse"></span>En Vivo · R2 Completada</div>
+  <div class="subtitle">72 Holes · 4 Rounds · En curso</div>
+  <div class="live-pill"><span class="pulse"></span>En Vivo · R3 Completada · R4 Pendiente</div>
 </header>
 
 <div class="tabs-bar">
@@ -178,7 +170,6 @@ table.sc th:last-child, table.sc td:last-child { border-right:none; }
   <button class="tab" onclick="switchTab('sc')">🃏 Tarjetas de Juego</button>
 </div>
 
-<!-- LEADERBOARD TAB -->
 <div class="tab-panel active" id="panel-lb">
   <div class="table-wrap">
     <table class="lb">
@@ -196,11 +187,10 @@ table.sc th:last-child, table.sc td:last-child { border-right:none; }
     <div class="li"><div class="ld" style="background:var(--under)"></div>Bajo par</div>
     <div class="li"><div class="ld" style="background:var(--muted)"></div>Par (E)</div>
     <div class="li"><div class="ld" style="background:var(--over)"></div>Sobre par</div>
-    <div class="hint" style="margin-top:0;margin-left:12px;">R3 y R4: escribí el resultado vs par y presioná Enter.</div>
+    <div class="hint" style="margin-top:0;margin-left:12px;">R4: escribí el resultado vs par y presioná Enter.</div>
   </div>
 </div>
 
-<!-- SCORECARDS TAB -->
 <div class="tab-panel" id="panel-sc">
   <div class="round-selector" id="round-selector"></div>
   <div id="sc-cards"></div>
@@ -225,14 +215,13 @@ const PLAYERS = [
   { id:'yemin',      name:'Yemin#47440' },
 ].map((p,i) => ({ ...p, color:COLORS[i] }));
 
-// Par per round
 const PARS = {
   R1: [4,5,3,4,4,3,5,4,4,  4,4,5,3,4,4,3,4,4],
   R2: [4,3,5,3,5,4,3,4,4,  4,3,5,3,4,3,4,4,4],
+  R3: [4,5,4,4,3,5,3,4,4,  4,4,3,4,5,4,4,3,5],
 };
-const PAR_TOTAL = { R1:71, R2:69 };
+const PAR_TOTAL = { R1:71, R2:69, R3:72 };
 
-// Scores hoyo x hoyo
 const SCORES = {
   R1: {
     tuchinn:    [5,4,3,5,3,3,4,4,3,  3,4,5,3,6,4,2,3,4],
@@ -246,25 +235,28 @@ const SCORES = {
     bautigassi: [4,2,5,5,5,3,4,4,4,  4,4,4,3,4,4,3,3,3],
     yemin:      [3,3,4,3,4,4,2,4,4,  4,3,5,3,4,3,3,2,4],
   },
+  R3: {
+    tuchinn:    [5,3,4,7,3,4,3,3,3,  3,4,2,4,4,4,5,2,4],
+    morris:     [4,5,7,4,2,4,4,5,6,  4,6,3,4,6,4,6,3,3],
+    bautigassi: [3,4,6,4,4,4,3,4,4,  3,4,3,3,4,4,4,4,4],
+    yemin:      [3,5,4,3,2,3,4,3,4,  6,4,3,5,6,5,4,3,5],
+  },
 };
 
-// R1 & R2 vs par (locked), R3/R4 editable
+// R1/R2/R3 locked, R4 editable
 const ROUND_VS = {
-  tuchinn:    [-3, -7, null, null],
-  morris:     [+7, +1, null, null],
-  bautigassi: [ 0, -1, null, null],
-  yemin:      [-5, -7, null, null],
+  tuchinn:    [-3, -7, -5, null],
+  morris:     [+7, +1, +8, null],
+  bautigassi: [ 0, -1, -3, null],
+  yemin:      [-5, -7,  0, null],
 };
 
 // ═══════════════════════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════════════════════
-function totalVs(pid) {
-  return ROUND_VS[pid].reduce((s,v) => s + (v ?? 0), 0);
-}
-function roundsPlayed(pid) {
-  return ROUND_VS[pid].filter(v => v !== null).length;
-}
+function totalVs(pid) { return ROUND_VS[pid].reduce((s,v) => s + (v ?? 0), 0); }
+function roundsPlayed(pid) { return ROUND_VS[pid].filter(v => v !== null).length; }
+
 function fmt(v) {
   if (v === null) return '';
   if (v === 0) return 'E';
@@ -315,7 +307,7 @@ function renderLB() {
     const tr = document.createElement('tr');
     if (rank === 0) tr.classList.add('leader-row');
 
-    // Player
+    // Player cell
     const ptd = document.createElement('td');
     ptd.innerHTML = `<div class="pcell">
       <span class="prank ${rankCls[rank]}">${rank+1}</span>
@@ -324,11 +316,10 @@ function renderLB() {
     </div>`;
     tr.appendChild(ptd);
 
-    // R1 & R2 locked
-    [0,1].forEach(ri => {
+    // R1 R2 R3 locked
+    [0,1,2].forEach(ri => {
       const v = ROUND_VS[pid][ri];
-      const td = document.createElement('td');
-      td.className = 'rcell';
+      const td = document.createElement('td'); td.className='rcell';
       td.innerHTML = `<div class="rwrap">
         <span class="rlabel">R${ri+1}</span>
         <input class="rinput locked ${cls(v)}" value="${fmt(v)}" readonly tabindex="-1">
@@ -336,44 +327,43 @@ function renderLB() {
       tr.appendChild(td);
     });
 
-    // R3 R4 editable
-    [2,3].forEach(ri => {
-      const v = ROUND_VS[pid][ri];
-      const td = document.createElement('td'); td.className='rcell';
-      const inp = document.createElement('input');
-      inp.type='text';
-      inp.className='rinput'+(v!==null?' '+cls(v):'');
-      inp.value = v!==null ? fmt(v) : '';
-      inp.placeholder='—';
-      inp.dataset.pid=pid; inp.dataset.ri=ri;
-      inp.addEventListener('blur', e => {
-        const parsed = parse(e.target.value);
-        ROUND_VS[pid][ri] = parsed;
-        renderLB();
-      });
-      inp.addEventListener('keydown', e => {
-        if (e.key==='Enter') e.target.blur();
-        if (e.key==='Tab') {
-          e.preventDefault(); e.target.blur();
-          const all = [...document.querySelectorAll('.rinput:not(.locked)')];
-          const idx = all.indexOf(e.target);
-          const next = all[idx+(e.shiftKey?-1:1)];
-          if (next) next.focus();
-        }
-      });
-      const wrap = document.createElement('div'); wrap.className='rwrap';
-      const lbl = document.createElement('span'); lbl.className='rlabel'; lbl.textContent=`R${ri+1}`;
-      wrap.appendChild(lbl); wrap.appendChild(inp);
-      td.appendChild(wrap); tr.appendChild(td);
+    // R4 editable
+    const ri = 3;
+    const v = ROUND_VS[pid][ri];
+    const td = document.createElement('td'); td.className='rcell';
+    const inp = document.createElement('input');
+    inp.type='text';
+    inp.className='rinput'+(v!==null?' '+cls(v):'');
+    inp.value = v!==null ? fmt(v) : '';
+    inp.placeholder='—';
+    inp.dataset.pid=pid; inp.dataset.ri=ri;
+    inp.addEventListener('blur', e => {
+      const parsed = parse(e.target.value);
+      ROUND_VS[pid][ri] = parsed;
+      renderLB();
     });
+    inp.addEventListener('keydown', e => {
+      if (e.key==='Enter') e.target.blur();
+      if (e.key==='Tab') {
+        e.preventDefault(); e.target.blur();
+        const all = [...document.querySelectorAll('.rinput:not(.locked)')];
+        const idx = all.indexOf(e.target);
+        const next = all[idx+(e.shiftKey?-1:1)];
+        if (next) next.focus();
+      }
+    });
+    const wrap = document.createElement('div'); wrap.className='rwrap';
+    const lbl = document.createElement('span'); lbl.className='rlabel'; lbl.textContent='R4';
+    wrap.appendChild(lbl); wrap.appendChild(inp);
+    td.appendChild(wrap); tr.appendChild(td);
 
     // Total
     const vs = totalVs(pid);
     const rp = roundsPlayed(pid);
+    const parTotals = [71, 69, 72, 71];
     const strokes = ROUND_VS[pid].reduce((s,v,i) => {
       if (v === null) return s;
-      const par = i < 2 ? PAR_TOTAL[`R${i+1}`] : 71;
-      return s + par + v;
+      return s + parTotals[i] + v;
     }, 0);
 
     const totd = document.createElement('td'); totd.className='tcell';
@@ -396,7 +386,7 @@ function renderLB() {
 // SCORECARDS
 // ═══════════════════════════════════════════════════════════
 let activeRound = 'R1';
-const AVAILABLE_ROUNDS = ['R1','R2'];
+const AVAILABLE_ROUNDS = ['R1','R2','R3'];
 
 function renderRoundSelector() {
   const sel = document.getElementById('round-selector');
@@ -404,7 +394,7 @@ function renderRoundSelector() {
   AVAILABLE_ROUNDS.forEach(r => {
     const btn = document.createElement('button');
     btn.className = 'rsel-btn' + (r===activeRound?' active':'');
-    btn.textContent = r === 'R1' ? 'Ronda 1' : 'Ronda 2';
+    btn.textContent = { R1:'Ronda 1 · Royal Portrush', R2:'Ronda 2 · Royal Portrush', R3:'Ronda 3 · Pebble Beach' }[r];
     btn.onclick = () => { activeRound=r; renderRoundSelector(); renderScorecards(); };
     sel.appendChild(btn);
   });
@@ -461,9 +451,6 @@ function renderScorecards() {
 }
 
 function buildScTable(sc, pars, par_front, par_back, par_total) {
-  const frontCols = Array.from({length:9},(_,i)=>i);
-  const backCols  = Array.from({length:9},(_,i)=>i+9);
-
   function holeHeaders() {
     let h = `<th class="sc-th-lbl">Hoyo</th>`;
     for(let i=0;i<9;i++) h += `<th class="sc-th-hole">${i+1}</th>`;
@@ -472,7 +459,6 @@ function buildScTable(sc, pars, par_front, par_back, par_total) {
     h += `<th class="sc-th-sub">IN</th><th class="sc-th-sub">TOT</th>`;
     return `<tr>${h}</tr>`;
   }
-
   function parRow() {
     let r = `<td class="sc-par" style="text-align:left;padding-left:10px;font-size:10px;letter-spacing:1px">PAR</td>`;
     for(let i=0;i<9;i++) r += `<td class="sc-par">${pars[i]}</td>`;
@@ -481,7 +467,6 @@ function buildScTable(sc, pars, par_front, par_back, par_total) {
     r += `<td class="sc-par-sub">${par_back}</td><td class="sc-par-sub">${par_total}</td>`;
     return `<tr>${r}</tr>`;
   }
-
   function scoreRow() {
     let r = `<td class="sc-th-lbl" style="text-align:left;padding-left:10px"></td>`;
     let fs = 0;
@@ -491,19 +476,16 @@ function buildScTable(sc, pars, par_front, par_back, par_total) {
         r += `<td class="sc-sub">${fs}<small>${vsStr(vs)}</small></td>`;
       }
       const s=sc[i], par=pars[i], st=scoreType(s,par);
-      const cls2 = st==='par'?'sc-par-s':`sc-${st}`;
-      r += `<td class="sc-score ${cls2}">${s}</td>`;
+      const c = st==='par'?'sc-par-s':`sc-${st}`;
+      r += `<td class="sc-score ${c}">${s}</td>`;
       if(i<9) fs+=s;
     }
     const bs = sc.slice(9).reduce((a,b)=>a+b,0);
     const tot = sc.reduce((a,b)=>a+b,0);
-    const bvs = bs - par_back;
-    const tvs = tot - par_total;
-    r += `<td class="sc-sub">${bs}<small>${vsStr(bvs)}</small></td>`;
-    r += `<td class="sc-sub" style="background:rgba(240,180,41,.1)">${tot}<small>${vsStr(tvs)}</small></td>`;
+    r += `<td class="sc-sub">${bs}<small>${vsStr(bs-par_back)}</small></td>`;
+    r += `<td class="sc-sub" style="background:rgba(240,180,41,.1)">${tot}<small>${vsStr(tot-par_total)}</small></td>`;
     return `<tr>${r}</tr>`;
   }
-
   return `<table class="sc"><thead>${holeHeaders()}</thead><tbody>${parRow()}${scoreRow()}</tbody></table>`;
 }
 
@@ -517,9 +499,7 @@ function switchTab(id) {
   document.getElementById(`panel-${id}`).classList.add('active');
 }
 
-// ═══════════════════════════════════════════════════════════
 // INIT
-// ═══════════════════════════════════════════════════════════
 renderLB();
 renderRoundSelector();
 renderScorecards();
