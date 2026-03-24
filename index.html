@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VARA CUP</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+:root {
+  --bg:#080c14; --s1:#0e1520; --s2:#131c2c; --border:#1c2a40;
+  --gold:#f0b429; --text:#dde4f0; --muted:#5a6a82;
+  --under:#e94560; --over:#f97316;
+  --eagle-bg:#f0b429; --eagle-fg:#000;
+  --birdie-bg:#e94560; --birdie-fg:#fff;
+  --par-bg:#131c2c; --par-fg:#5a6a82;
+  --bogey-bg:#f97316; --bogey-fg:#fff;
+  --double-bg:#991b1b; --double-fg:#fff;
+  --p0:#22c55e; --p1:#3b82f6; --p2:#a855f7; --p3:#f97316;
+}
+body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; }
+
+/* ── HEADER ── */
+header {
+  padding:32px 48px 24px; border-bottom:1px solid var(--border);
+  background:linear-gradient(160deg,#0e1520 0%,#080c14 60%,#0a1225 100%);
+  position:relative; overflow:hidden;
+}
+header::after {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:radial-gradient(ellipse 60% 80% at 90% 50%,rgba(240,180,41,.07) 0%,transparent 70%);
+}
+.title { font-family:'Bebas Neue',sans-serif; font-size:clamp(44px,6vw,80px); letter-spacing:6px; color:var(--gold); line-height:1; text-shadow:0 0 80px rgba(240,180,41,.2); }
+.subtitle { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; margin-top:5px; }
+.live-pill {
+  display:inline-flex; align-items:center; gap:7px; margin-top:16px;
+  padding:5px 14px; border-radius:20px; border:1px solid rgba(240,180,41,.25);
+  background:rgba(240,180,41,.07); font-family:'DM Mono',monospace;
+  font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--gold);
+}
+.pulse { width:6px; height:6px; border-radius:50%; background:#22c55e; animation:pulse 1.8s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.3;transform:scale(.7)} }
+
+/* ── TABS ── */
+.tabs-bar {
+  display:flex; gap:2px; padding:0 48px;
+  background:var(--s1); border-bottom:1px solid var(--border);
+}
+.tab {
+  font-family:'DM Mono',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase;
+  padding:14px 22px; border:none; background:transparent; color:var(--muted);
+  cursor:pointer; border-bottom:2px solid transparent; transition:all .15s;
+}
+.tab:hover { color:var(--text); }
+.tab.active { color:var(--gold); border-bottom-color:var(--gold); }
+
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+
+/* ── LEADERBOARD ── */
+#panel-lb { padding:36px 48px; }
+.table-wrap { background:var(--s1); border:1px solid var(--border); border-radius:14px; overflow:hidden; }
+table.lb { width:100%; border-collapse:collapse; }
+table.lb thead th {
+  font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2.5px; text-transform:uppercase;
+  color:var(--muted); padding:13px 10px; text-align:center;
+  background:var(--s2); border-bottom:1px solid var(--border); font-weight:400;
+}
+table.lb thead th:first-child { text-align:left; padding-left:24px; }
+table.lb thead th.total-col { color:var(--gold); }
+table.lb tbody tr { border-bottom:1px solid var(--border); transition:background .12s; }
+table.lb tbody tr:last-child { border-bottom:none; }
+table.lb tbody tr:hover { background:rgba(255,255,255,.018); }
+table.lb tbody tr.leader-row { border-left:2px solid var(--gold); }
+table.lb td { vertical-align:middle; text-align:center; }
+table.lb td:first-child { text-align:left; }
+
+.pcell { display:flex; align-items:center; gap:12px; padding:18px 24px; }
+.prank { font-family:'Bebas Neue',sans-serif; font-size:24px; color:var(--muted); width:22px; text-align:center; flex-shrink:0; }
+.prank.r1{color:#f0b429} .prank.r2{color:#b0bec5} .prank.r3{color:#bf8e5a}
+.pdot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.pname { font-size:15px; font-weight:600; }
+
+.rcell { padding:10px 8px; min-width:84px; }
+.rwrap { display:flex; flex-direction:column; align-items:center; gap:3px; }
+.rlabel { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); }
+.rinput {
+  width:68px; height:40px; background:var(--s2); border:1px solid var(--border); border-radius:8px;
+  color:var(--text); font-family:'DM Mono',monospace; font-size:16px; font-weight:500;
+  text-align:center; outline:none; transition:all .15s;
+}
+.rinput:focus { border-color:var(--gold); background:rgba(240,180,41,.1); box-shadow:0 0 0 3px rgba(240,180,41,.1); }
+.rinput.locked { cursor:default; pointer-events:none; border-color:transparent; background:transparent; }
+.rinput.under { color:var(--under); }
+.rinput.over  { color:var(--over);  }
+.rinput.even  { color:var(--muted); }
+
+.tcell { padding:10px 20px; min-width:115px; }
+.tinner { display:flex; flex-direction:column; align-items:center; gap:1px; }
+.tstrokes { font-family:'Bebas Neue',sans-serif; font-size:30px; line-height:1; }
+.tvspar { font-family:'DM Mono',monospace; font-size:13px; font-weight:500; }
+.tvspar.under{color:var(--under)} .tvspar.over{color:var(--over)} .tvspar.even{color:var(--muted)}
+.tthru { font-family:'DM Mono',monospace; font-size:9px; color:var(--muted); letter-spacing:1px; }
+
+/* ── SCORECARDS PANEL ── */
+#panel-sc { padding:36px 48px; }
+.round-selector { display:flex; gap:8px; margin-bottom:28px; flex-wrap:wrap; }
+.rsel-btn {
+  font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase;
+  padding:7px 18px; border-radius:6px; border:1px solid var(--border);
+  background:transparent; color:var(--muted); cursor:pointer; transition:all .15s;
+}
+.rsel-btn:hover { border-color:var(--muted); color:var(--text); }
+.rsel-btn.active { background:var(--gold); color:#000; border-color:var(--gold); font-weight:600; }
+
+.sc-player-card {
+  background:var(--s1); border:1px solid var(--border); border-radius:12px;
+  margin-bottom:16px; overflow:hidden;
+}
+.sc-player-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:13px 20px; border-bottom:1px solid var(--border);
+}
+.sc-player-name { display:flex; align-items:center; gap:10px; }
+.sc-pdot { width:9px; height:9px; border-radius:50%; }
+.sc-pname { font-size:14px; font-weight:600; }
+.sc-totals { display:flex; gap:16px; align-items:center; }
+.sc-tot-block { text-align:center; }
+.sc-tot-lbl { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); display:block; }
+.sc-tot-val { font-family:'Bebas Neue',sans-serif; font-size:22px; line-height:1.1; }
+.sc-sep { width:1px; height:28px; background:var(--border); }
+
+.sc-table-wrap { overflow-x:auto; }
+table.sc { width:100%; border-collapse:collapse; min-width:680px; }
+table.sc th, table.sc td { border-right:1px solid var(--border); text-align:center; padding:0; }
+table.sc th:last-child, table.sc td:last-child { border-right:none; }
+
+.sc-th-lbl { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); padding:7px 10px; background:var(--s2); min-width:44px; }
+.sc-th-hole { font-family:'DM Mono',monospace; font-size:10px; color:var(--muted); padding:7px 4px; background:var(--s2); min-width:34px; }
+.sc-th-sub  { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:1px; color:var(--gold); padding:7px 8px; background:var(--s2); min-width:58px; }
+
+.sc-par { font-family:'DM Mono',monospace; font-size:11px; color:var(--muted); padding:5px 4px; background:var(--s2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+.sc-par-sub { font-family:'DM Mono',monospace; font-size:11px; color:var(--gold); padding:5px 8px; background:var(--s2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+
+.sc-score { padding:5px 3px; font-family:'DM Mono',monospace; font-size:13px; font-weight:500; height:34px; vertical-align:middle; }
+.sc-eagle  { background:var(--eagle-bg);  color:var(--eagle-fg);  font-weight:700; }
+.sc-birdie { background:var(--birdie-bg); color:var(--birdie-fg); }
+.sc-par-s  { background:var(--par-bg);    color:var(--par-fg); }
+.sc-bogey  { background:var(--bogey-bg);  color:var(--bogey-fg); }
+.sc-double { background:var(--double-bg); color:var(--double-fg); }
+.sc-empty  { background:transparent; color:var(--muted); }
+
+.sc-sub { font-family:'DM Mono',monospace; font-size:11px; color:var(--text); padding:5px 8px; background:rgba(240,180,41,.05); border-left:1px solid rgba(240,180,41,.2); height:34px; vertical-align:middle; }
+.sc-sub small { display:block; font-size:9px; color:var(--muted); line-height:1; margin-top:1px; }
+
+/* legend */
+.legend { display:flex; gap:16px; align-items:center; flex-wrap:wrap; margin-top:20px; }
+.li { display:flex; align-items:center; gap:6px; font-family:'DM Mono',monospace; font-size:10px; color:var(--muted); }
+.ld { width:10px; height:10px; border-radius:2px; }
+.hint { font-family:'DM Mono',monospace; font-size:10px; color:var(--muted); margin-top:10px; }
+
+@media(max-width:700px){
+  header,.tabs-bar,#panel-lb,#panel-sc{padding-left:20px;padding-right:20px;}
+  .rinput{width:58px;font-size:14px;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title">VARA CUP</div>
+  <div class="subtitle">Royal Portrush Golf Club · 72 Holes · 4 Rounds</div>
+  <div class="live-pill"><span class="pulse"></span>En Vivo · R2 Completada</div>
+</header>
+
+<div class="tabs-bar">
+  <button class="tab active" onclick="switchTab('lb')">🏆 Leaderboard</button>
+  <button class="tab" onclick="switchTab('sc')">🃏 Tarjetas de Juego</button>
+</div>
+
+<!-- LEADERBOARD TAB -->
+<div class="tab-panel active" id="panel-lb">
+  <div class="table-wrap">
+    <table class="lb">
+      <thead>
+        <tr>
+          <th>Jugador</th>
+          <th>R1</th><th>R2</th><th>R3</th><th>R4</th>
+          <th class="total-col">Total</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+  <div class="legend" style="padding:0;margin-top:16px;">
+    <div class="li"><div class="ld" style="background:var(--under)"></div>Bajo par</div>
+    <div class="li"><div class="ld" style="background:var(--muted)"></div>Par (E)</div>
+    <div class="li"><div class="ld" style="background:var(--over)"></div>Sobre par</div>
+    <div class="hint" style="margin-top:0;margin-left:12px;">R3 y R4: escribí el resultado vs par y presioná Enter.</div>
+  </div>
+</div>
+
+<!-- SCORECARDS TAB -->
+<div class="tab-panel" id="panel-sc">
+  <div class="round-selector" id="round-selector"></div>
+  <div id="sc-cards"></div>
+  <div class="legend">
+    <div class="li"><div class="ld" style="background:var(--eagle-bg)"></div>Águila</div>
+    <div class="li"><div class="ld" style="background:var(--birdie-bg)"></div>Birdie</div>
+    <div class="li"><div class="ld" style="background:var(--par-bg);border:1px solid var(--border)"></div>Par</div>
+    <div class="li"><div class="ld" style="background:var(--bogey-bg)"></div>Bogey</div>
+    <div class="li"><div class="ld" style="background:var(--double-bg)"></div>Doble+</div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════
+const COLORS = ['#22c55e','#3b82f6','#a855f7','#f97316'];
+const PLAYERS = [
+  { id:'tuchinn',    name:'tuchinn29' },
+  { id:'morris',     name:'morris#13179' },
+  { id:'bautigassi', name:'bautigassi' },
+  { id:'yemin',      name:'Yemin#47440' },
+].map((p,i) => ({ ...p, color:COLORS[i] }));
+
+// Par per round
+const PARS = {
+  R1: [4,5,3,4,4,3,5,4,4,  4,4,5,3,4,4,3,4,4],
+  R2: [4,3,5,3,5,4,3,4,4,  4,3,5,3,4,3,4,4,4],
+};
+const PAR_TOTAL = { R1:71, R2:69 };
+
+// Scores hoyo x hoyo
+const SCORES = {
+  R1: {
+    tuchinn:    [5,4,3,5,3,3,4,4,3,  3,4,5,3,6,4,2,3,4],
+    morris:     [5,5,3,6,4,2,4,4,4,  5,4,5,3,6,5,5,4,4],
+    bautigassi: [4,4,3,5,3,3,4,4,4,  4,4,4,3,6,3,5,4,4],
+    yemin:      [4,4,3,3,4,3,4,4,5,  3,4,4,2,5,4,3,3,4],
+  },
+  R2: {
+    tuchinn:    [3,3,4,3,4,3,3,3,3,  4,3,4,3,4,3,3,5,4],
+    morris:     [3,3,3,4,4,3,2,4,6,  4,2,6,3,5,6,4,4,4],
+    bautigassi: [4,2,5,5,5,3,4,4,4,  4,4,4,3,4,4,3,3,3],
+    yemin:      [3,3,4,3,4,4,2,4,4,  4,3,5,3,4,3,3,2,4],
+  },
+};
+
+// R1 & R2 vs par (locked), R3/R4 editable
+const ROUND_VS = {
+  tuchinn:    [-3, -7, null, null],
+  morris:     [+7, +1, null, null],
+  bautigassi: [ 0, -1, null, null],
+  yemin:      [-5, -7, null, null],
+};
+
+// ═══════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════
+function totalVs(pid) {
+  return ROUND_VS[pid].reduce((s,v) => s + (v ?? 0), 0);
+}
+function roundsPlayed(pid) {
+  return ROUND_VS[pid].filter(v => v !== null).length;
+}
+function fmt(v) {
+  if (v === null) return '';
+  if (v === 0) return 'E';
+  return v > 0 ? '+'+v : String(v);
+}
+function cls(v) {
+  if (v === null || v === 0) return 'even';
+  return v < 0 ? 'under' : 'over';
+}
+function parse(raw) {
+  const s = raw.trim().toLowerCase();
+  if (s === '') return null;
+  if (s === 'e') return 0;
+  const n = parseInt(s, 10);
+  return isNaN(n) ? null : n;
+}
+function scoreType(s, par) {
+  const d = s - par;
+  if (d <= -2) return 'eagle';
+  if (d === -1) return 'birdie';
+  if (d === 0)  return 'par';
+  if (d === 1)  return 'bogey';
+  return 'double';
+}
+function vsStr(vs) {
+  if (vs === 0) return 'E';
+  return vs > 0 ? '+'+vs : String(vs);
+}
+
+// ═══════════════════════════════════════════════════════════
+// LEADERBOARD
+// ═══════════════════════════════════════════════════════════
+function sorted() {
+  return [...PLAYERS].sort((a,b) => totalVs(a.id) - totalVs(b.id));
+}
+
+function renderLB() {
+  const tbody = document.getElementById('tbody');
+  const focusPid = document.activeElement?.dataset?.pid;
+  const focusRi  = document.activeElement?.dataset?.ri;
+  tbody.innerHTML = '';
+
+  const list = sorted();
+  const rankCls = ['r1','r2','r3',''];
+
+  list.forEach((p, rank) => {
+    const pid = p.id;
+    const tr = document.createElement('tr');
+    if (rank === 0) tr.classList.add('leader-row');
+
+    // Player
+    const ptd = document.createElement('td');
+    ptd.innerHTML = `<div class="pcell">
+      <span class="prank ${rankCls[rank]}">${rank+1}</span>
+      <span class="pdot" style="background:${p.color}"></span>
+      <span class="pname">${p.name}</span>
+    </div>`;
+    tr.appendChild(ptd);
+
+    // R1 & R2 locked
+    [0,1].forEach(ri => {
+      const v = ROUND_VS[pid][ri];
+      const td = document.createElement('td');
+      td.className = 'rcell';
+      td.innerHTML = `<div class="rwrap">
+        <span class="rlabel">R${ri+1}</span>
+        <input class="rinput locked ${cls(v)}" value="${fmt(v)}" readonly tabindex="-1">
+      </div>`;
+      tr.appendChild(td);
+    });
+
+    // R3 R4 editable
+    [2,3].forEach(ri => {
+      const v = ROUND_VS[pid][ri];
+      const td = document.createElement('td'); td.className='rcell';
+      const inp = document.createElement('input');
+      inp.type='text';
+      inp.className='rinput'+(v!==null?' '+cls(v):'');
+      inp.value = v!==null ? fmt(v) : '';
+      inp.placeholder='—';
+      inp.dataset.pid=pid; inp.dataset.ri=ri;
+      inp.addEventListener('blur', e => {
+        const parsed = parse(e.target.value);
+        ROUND_VS[pid][ri] = parsed;
+        renderLB();
+      });
+      inp.addEventListener('keydown', e => {
+        if (e.key==='Enter') e.target.blur();
+        if (e.key==='Tab') {
+          e.preventDefault(); e.target.blur();
+          const all = [...document.querySelectorAll('.rinput:not(.locked)')];
+          const idx = all.indexOf(e.target);
+          const next = all[idx+(e.shiftKey?-1:1)];
+          if (next) next.focus();
+        }
+      });
+      const wrap = document.createElement('div'); wrap.className='rwrap';
+      const lbl = document.createElement('span'); lbl.className='rlabel'; lbl.textContent=`R${ri+1}`;
+      wrap.appendChild(lbl); wrap.appendChild(inp);
+      td.appendChild(wrap); tr.appendChild(td);
+    });
+
+    // Total
+    const vs = totalVs(pid);
+    const rp = roundsPlayed(pid);
+    const strokes = ROUND_VS[pid].reduce((s,v,i) => {
+      if (v === null) return s;
+      const par = i < 2 ? PAR_TOTAL[`R${i+1}`] : 71;
+      return s + par + v;
+    }, 0);
+
+    const totd = document.createElement('td'); totd.className='tcell';
+    totd.innerHTML=`<div class="tinner">
+      <span class="tstrokes" style="color:${p.color}">${strokes}</span>
+      <span class="tvspar ${cls(vs)}">${fmt(vs)}</span>
+      <span class="tthru">${rp} ronda${rp>1?'s':''}</span>
+    </div>`;
+    tr.appendChild(totd);
+    tbody.appendChild(tr);
+  });
+
+  if (focusPid && focusRi) {
+    const el = document.querySelector(`input[data-pid="${focusPid}"][data-ri="${focusRi}"]`);
+    if (el) el.focus();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// SCORECARDS
+// ═══════════════════════════════════════════════════════════
+let activeRound = 'R1';
+const AVAILABLE_ROUNDS = ['R1','R2'];
+
+function renderRoundSelector() {
+  const sel = document.getElementById('round-selector');
+  sel.innerHTML = '';
+  AVAILABLE_ROUNDS.forEach(r => {
+    const btn = document.createElement('button');
+    btn.className = 'rsel-btn' + (r===activeRound?' active':'');
+    btn.textContent = r === 'R1' ? 'Ronda 1' : 'Ronda 2';
+    btn.onclick = () => { activeRound=r; renderRoundSelector(); renderScorecards(); };
+    sel.appendChild(btn);
+  });
+}
+
+function renderScorecards() {
+  const container = document.getElementById('sc-cards');
+  container.innerHTML = '';
+  const pars = PARS[activeRound];
+  const par_front = pars.slice(0,9).reduce((a,b)=>a+b,0);
+  const par_back  = pars.slice(9).reduce((a,b)=>a+b,0);
+  const par_total = par_front + par_back;
+
+  PLAYERS.forEach(p => {
+    const pid = p.id;
+    const sc = SCORES[activeRound][pid];
+    const front = sc.slice(0,9).reduce((a,b)=>a+b,0);
+    const back  = sc.slice(9).reduce((a,b)=>a+b,0);
+    const total = front + back;
+    const fvs = front - par_front;
+    const bvs = back  - par_back;
+    const tvs = total - par_total;
+
+    const card = document.createElement('div');
+    card.className = 'sc-player-card';
+    card.innerHTML = `
+      <div class="sc-player-header">
+        <div class="sc-player-name">
+          <div class="sc-pdot" style="background:${p.color}"></div>
+          <div class="sc-pname">${p.name}</div>
+        </div>
+        <div class="sc-totals">
+          <div class="sc-tot-block">
+            <span class="sc-tot-lbl">Out</span>
+            <span class="sc-tot-val ${cls(fvs)}">${front}</span>
+          </div>
+          <div class="sc-sep"></div>
+          <div class="sc-tot-block">
+            <span class="sc-tot-lbl">In</span>
+            <span class="sc-tot-val ${cls(bvs)}">${back}</span>
+          </div>
+          <div class="sc-sep"></div>
+          <div class="sc-tot-block">
+            <span class="sc-tot-lbl">Total</span>
+            <span class="sc-tot-val ${cls(tvs)}" style="font-size:26px">${total} <small style="font-size:14px;font-family:'DM Mono',monospace">${vsStr(tvs)}</small></span>
+          </div>
+        </div>
+      </div>
+      <div class="sc-table-wrap">
+        ${buildScTable(sc, pars, par_front, par_back, par_total)}
+      </div>`;
+    container.appendChild(card);
+  });
+}
+
+function buildScTable(sc, pars, par_front, par_back, par_total) {
+  const frontCols = Array.from({length:9},(_,i)=>i);
+  const backCols  = Array.from({length:9},(_,i)=>i+9);
+
+  function holeHeaders() {
+    let h = `<th class="sc-th-lbl">Hoyo</th>`;
+    for(let i=0;i<9;i++) h += `<th class="sc-th-hole">${i+1}</th>`;
+    h += `<th class="sc-th-sub">OUT</th>`;
+    for(let i=9;i<18;i++) h += `<th class="sc-th-hole">${i+1}</th>`;
+    h += `<th class="sc-th-sub">IN</th><th class="sc-th-sub">TOT</th>`;
+    return `<tr>${h}</tr>`;
+  }
+
+  function parRow() {
+    let r = `<td class="sc-par" style="text-align:left;padding-left:10px;font-size:10px;letter-spacing:1px">PAR</td>`;
+    for(let i=0;i<9;i++) r += `<td class="sc-par">${pars[i]}</td>`;
+    r += `<td class="sc-par-sub">${par_front}</td>`;
+    for(let i=9;i<18;i++) r += `<td class="sc-par">${pars[i]}</td>`;
+    r += `<td class="sc-par-sub">${par_back}</td><td class="sc-par-sub">${par_total}</td>`;
+    return `<tr>${r}</tr>`;
+  }
+
+  function scoreRow() {
+    let r = `<td class="sc-th-lbl" style="text-align:left;padding-left:10px"></td>`;
+    let fs = 0;
+    for(let i=0;i<18;i++) {
+      if(i===9) {
+        const vs = fs - par_front;
+        r += `<td class="sc-sub">${fs}<small>${vsStr(vs)}</small></td>`;
+      }
+      const s=sc[i], par=pars[i], st=scoreType(s,par);
+      const cls2 = st==='par'?'sc-par-s':`sc-${st}`;
+      r += `<td class="sc-score ${cls2}">${s}</td>`;
+      if(i<9) fs+=s;
+    }
+    const bs = sc.slice(9).reduce((a,b)=>a+b,0);
+    const tot = sc.reduce((a,b)=>a+b,0);
+    const bvs = bs - par_back;
+    const tvs = tot - par_total;
+    r += `<td class="sc-sub">${bs}<small>${vsStr(bvs)}</small></td>`;
+    r += `<td class="sc-sub" style="background:rgba(240,180,41,.1)">${tot}<small>${vsStr(tvs)}</small></td>`;
+    return `<tr>${r}</tr>`;
+  }
+
+  return `<table class="sc"><thead>${holeHeaders()}</thead><tbody>${parRow()}${scoreRow()}</tbody></table>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════════
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`[onclick="switchTab('${id}')"]`).classList.add('active');
+  document.getElementById(`panel-${id}`).classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+renderLB();
+renderRoundSelector();
+renderScorecards();
+</script>
+</body>
+</html>
